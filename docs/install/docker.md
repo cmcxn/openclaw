@@ -166,7 +166,7 @@ Each instance needs unique values for:
 Example with two separate checkouts:
 
 ```bash
-# repo checkout: $HOME/openclaw-main
+# repo checkout: /path/to/openclaw-main
 export OPENCLAW_CONFIG_DIR=~/.openclaw-main
 export OPENCLAW_WORKSPACE_DIR=~/.openclaw-main/workspace
 export OPENCLAW_GATEWAY_PORT=18789
@@ -174,7 +174,7 @@ export OPENCLAW_BRIDGE_PORT=18790
 export OPENCLAW_HOME_VOLUME=openclaw_home_main
 ./docker-setup.sh
 
-# repo checkout: $HOME/openclaw-rescue
+# repo checkout: /path/to/openclaw-rescue
 export OPENCLAW_CONFIG_DIR=~/.openclaw-rescue
 export OPENCLAW_WORKSPACE_DIR=~/.openclaw-rescue/workspace
 export OPENCLAW_GATEWAY_PORT=19001
