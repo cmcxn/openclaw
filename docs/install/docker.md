@@ -61,6 +61,12 @@ This script:
 `docker-setup.sh` wires `.env`, generates optional compose overlays (extra mounts,
 sandbox), builds/pulls the image, runs onboarding, and starts the gateway service.
 
+Re-running `./docker-setup.sh` always invokes `docker build` when
+`OPENCLAW_IMAGE` is the default `openclaw:local`. Docker will reuse cached layers
+when nothing changed, but you can skip local rebuilds entirely by setting
+`OPENCLAW_IMAGE` to a pre-built tag (for example
+`ghcr.io/openclaw/openclaw:latest`).
+
 Optional env vars:
 
 - `OPENCLAW_IMAGE` — use a remote image instead of building locally (e.g. `ghcr.io/openclaw/openclaw:latest`)
