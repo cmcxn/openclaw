@@ -53,6 +53,14 @@ This script:
 - starts the gateway via Docker Compose
 - generates a gateway token and writes it to `.env`
 
+`docker-compose.yml` defines two services:
+
+- `openclaw-gateway` (gateway runtime, port publishing, config/workspace mounts)
+- `openclaw-cli` (CLI container sharing the gateway network for `127.0.0.1` access)
+
+`docker-setup.sh` wires `.env`, generates optional compose overlays (extra mounts,
+sandbox), builds/pulls the image, runs onboarding, and starts the gateway service.
+
 Optional env vars:
 
 - `OPENCLAW_IMAGE` — use a remote image instead of building locally (e.g. `ghcr.io/openclaw/openclaw:latest`)
@@ -139,6 +147,44 @@ It writes config/workspace on the host:
 
 - `~/.openclaw/`
 - `~/.openclaw/workspace`
+
+### Running multiple Docker gateways (single host)
+
+For multiple gateways on one host, you must keep their data and ports isolated.
+`docker-setup.sh` writes `.env` plus compose overlays (`docker-compose.extra.yml`,
+`docker-compose.sandbox.yml`) in the repo root, so run each instance from its own
+checkout or copy of this repo.
+
+Each instance needs unique values for:
+
+- `OPENCLAW_CONFIG_DIR`
+- `OPENCLAW_WORKSPACE_DIR`
+- `OPENCLAW_GATEWAY_PORT` (host-published port)
+- `OPENCLAW_BRIDGE_PORT` (host-published bridge port)
+- `OPENCLAW_HOME_VOLUME` (if you enable it)
+
+Example with two separate checkouts:
+
+```bash
+# repo checkout: ~/openclaw-main
+export OPENCLAW_CONFIG_DIR=~/.openclaw-main
+export OPENCLAW_WORKSPACE_DIR=~/.openclaw-main/workspace
+export OPENCLAW_GATEWAY_PORT=18789
+export OPENCLAW_BRIDGE_PORT=18790
+export OPENCLAW_HOME_VOLUME=openclaw_home_main
+./docker-setup.sh
+
+# repo checkout: ~/openclaw-rescue
+export OPENCLAW_CONFIG_DIR=~/.openclaw-rescue
+export OPENCLAW_WORKSPACE_DIR=~/.openclaw-rescue/workspace
+export OPENCLAW_GATEWAY_PORT=19001
+export OPENCLAW_BRIDGE_PORT=19002
+export OPENCLAW_HOME_VOLUME=openclaw_home_rescue
+./docker-setup.sh
+```
+
+If you change the gateway port inside the container (advanced) or expose extra
+ports, follow the spacing guidance in [Multiple Gateways](/gateway/multiple-gateways).
 
 Running on a VPS? See [Hetzner (Docker VPS)](/install/hetzner).
 
