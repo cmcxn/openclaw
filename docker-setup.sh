@@ -240,12 +240,22 @@ write_extra_compose() {
   local gateway_home_mount
   local gateway_config_mount
   local gateway_workspace_mount
+  # When a named home volume is set the base compose already lists the
+  # config/workspace bind mounts.  Docker Compose appends override-file
+  # volumes AFTER base volumes, so the named volume would end up last and
+  # shadow the bind mounts.  Use the `!reset` YAML extension (Docker Compose
+  # v2.17+) to replace the service volume list entirely, placing the named
+  # volume first so the bind mounts are applied on top of it.
+  local volumes_key="    volumes:"
+  if [[ -n "$home_volume" ]]; then
+    volumes_key="    volumes: !reset"
+  fi
 
-  cat >"$EXTRA_COMPOSE_FILE" <<'YAML'
-services:
-  openclaw-gateway:
-    volumes:
-YAML
+  {
+    printf 'services:\n'
+    printf '  openclaw-gateway:\n'
+    printf '%s\n' "$volumes_key"
+  } >"$EXTRA_COMPOSE_FILE"
 
   if [[ -n "$home_volume" ]]; then
     gateway_home_mount="${home_volume}:/home/node"
@@ -264,10 +274,10 @@ YAML
     printf '      - %s\n' "$mount" >>"$EXTRA_COMPOSE_FILE"
   done
 
-  cat >>"$EXTRA_COMPOSE_FILE" <<'YAML'
-  openclaw-cli:
-    volumes:
-YAML
+  {
+    printf '  openclaw-cli:\n'
+    printf '%s\n' "$volumes_key"
+  } >>"$EXTRA_COMPOSE_FILE"
 
   if [[ -n "$home_volume" ]]; then
     printf '      - %s\n' "$gateway_home_mount" >>"$EXTRA_COMPOSE_FILE"
